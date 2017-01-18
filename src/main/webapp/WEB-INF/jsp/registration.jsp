@@ -14,6 +14,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <title>User Registration Form</title>
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <%--<link href="<c:url value='/static/css/bootstrap.css' />" rel="stylesheet">--%>
     <%--<link href="<c:url value='/static/css/app.css' />" rel="stylesheet">--%>
 </head>
@@ -22,7 +23,8 @@
     <%@include file="authheader.jsp" %>
 
     <div class="well lead">User Registration Form</div>
-    <form:form method="POST" modelAttribute="user" class="form-horizontal">
+    <%--<form:form method="POST" modelAttribute="user" class="form-horizontal">--%>
+    <form:form method="POST" class="form-horizontal" commandName="user">
         <form:input type="hidden" path="id" id="id"/>
 
         <div class="row">
@@ -94,9 +96,14 @@
 
         <div class="row">
             <div class="form-group col-md-12">
-                <label class="col-md-3 control-lable" for="userProfiles">Roles</label>
+                <label class="col-md-3 control-lable" for="userProf">Roles</label>
                 <div class="col-md-7">
-                    <form:select path="userProfiles" items="${roles}" multiple="true" itemValue="id" itemLabel="type" class="form-control input-sm" />
+                    <form:select path="userProfiles" name="userProf" items="${roles}" multiple="true" itemValue="id" itemLabel="type" class="form-control input-sm" id="mysel"/>
+                    <%--<form:select path="userProfiles" multiple="false">
+                        <form:option value="none">---select---</form:option>
+                        <form:option value="1" selected="true">Admin</form:option>
+                        <form:option value="2">DBA</form:option>
+                    </form:select>--%>
                     <div class="has-error">
                         <form:errors path="userProfiles" class="help-inline"/>
                     </div>
@@ -108,10 +115,10 @@
             <div class="form-actions floatRight">
                 <c:choose>
                     <c:when test="${edit}">
-                        <input type="submit" value="Update" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/list' />">Cancel</a>
+                        <input type="submit" value="Update" class="btn btn-primary btn-sm"/> or <a href="<c:url value='list' />">Cancel</a>
                     </c:when>
                     <c:otherwise>
-                        <input type="submit" value="Register" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/list' />">Cancel</a>
+                        <input type="submit" value="Register" class="btn btn-primary btn-sm"/> or <a href="<c:url value='list' />">Cancel</a>
                     </c:otherwise>
                 </c:choose>
             </div>

@@ -32,6 +32,8 @@ public class UserServiceImpl implements UserService {
 
     public void saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        //I added this line
+//        user.setUserProfiles(user.getUserProfiles());
         dao.save(user);
     }
 

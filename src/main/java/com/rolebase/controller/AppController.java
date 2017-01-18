@@ -5,6 +5,7 @@ import com.rolebase.model.UserProfile;
 import com.rolebase.service.UserProfileService;
 import com.rolebase.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
@@ -16,16 +17,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by dorsa on 1/15/17.
@@ -33,7 +35,7 @@ import java.util.Locale;
 @Controller
 @RequestMapping("/")
 @SessionAttributes("roles")
-public class AppController {
+public class AppController{
 
     @Autowired
     UserService userService;
@@ -73,10 +75,10 @@ public class AppController {
      * saving user in database. It also validates the user input
      */
     @RequestMapping(value = { "newuser" }, method = RequestMethod.POST)
-    public String saveUser(@Valid User user, BindingResult result,
-                           ModelMap model) {
+    public String saveUser(@Valid User user, BindingResult result, ModelMap model) {
 
         if (result.hasErrors()) {
+            System.out.println("There are errors");
             return "registration";
         }
 
@@ -102,9 +104,77 @@ public class AppController {
         return "registrationsuccess";
     }
 
+    /**
+     * This method will provide the medium to update an existing user.
+     */
+    @RequestMapping(value = { "edit-user-{ssoId}" }, method = RequestMethod.GET)
+    public String editUser(@PathVariable String ssoId, ModelMap model) {
+        User user = userService.findBySSO(ssoId);
+        model.addAttribute("user", user);
+        model.addAttribute("edit", true);
+        model.addAttribute("loggedinuser", getPrincipal());
+        return "registration";
+    }
+
+    /**
+     * This method will be called on form submission, handling POST request for
+     * updating user in database. It also validates the user input
+     */
+    @RequestMapping(value = { "edit-user-{ssoId}" }, method = RequestMethod.POST)
+    public String updateUser(@Valid User user, BindingResult result,
+                             ModelMap model, @PathVariable String ssoId) {
+
+        if (result.hasErrors()) {
+            return "registration";
+        }
+
+		/*//Uncomment below 'if block' if you WANT TO ALLOW UPDATING SSO_ID in UI which is a unique key to a User.
+		if(!userService.isUserSSOUnique(user.getId(), user.getSsoId())){
+			FieldError ssoError =new FieldError("user","ssoId",messageSource.getMessage("non.unique.ssoId", new String[]{user.getSsoId()}, Locale.getDefault()));
+		    result.addError(ssoError);
+			return "registration";
+		}*/
+
+
+        userService.updateUser(user);
+
+        model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " updated successfully");
+        model.addAttribute("loggedinuser", getPrincipal());
+        return "registrationsuccess";
+    }
+
+
+    /**
+     * This method will delete an user by it's SSOID value.
+     */
+    @RequestMapping(value = { "delete-user-{ssoId}" }, method = RequestMethod.GET)
+    public String deleteUser(@PathVariable String ssoId) {
+        userService.deleteUserBySSO(ssoId);
+        return "redirect:/list";
+    }
+
+    /**
+     * This method will provide UserProfile list to views
+     */
     @ModelAttribute("roles")
     public List<UserProfile> initializeProfiles() {
         return userProfileService.findAll();
+    }
+
+    /*@RequestMapping("newuser")
+    public  List<UserProfile> initroles(Map map){
+
+        map.put("roles",userProfileService.findAll());
+        return userProfileService.findAll();
+    }*/
+
+    /**
+     * This method handles Access-Denied redirect.
+     */
+    @RequestMapping(value = "Access_Denied", method = RequestMethod.GET)
+    public String accessDeniedPage(ModelMap model) {
+        model.addAttribute("loggedinuser", getPrincipal());
+        return "accessDenied";
     }
 
     /**
@@ -135,6 +205,9 @@ public class AppController {
         return "redirect: login?logout";
     }
 
+    /**
+     * This method returns the principal[user-name] of logged-in user.
+     */
     private String getPrincipal(){
         String userName = null;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -152,5 +225,12 @@ public class AppController {
     private boolean isCurrentAuthenticationAnonymous() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authenticationTrustResolver.isAnonymous(authentication);
+    }
+
+    @InitBinder
+    public void databinding(WebDataBinder binder){
+
+//        binder.registerCustomEditor(Set.class,"roles",new CustomCollectionEditor(Set.class));
+        binder.registerCustomEditor(UserProfile.class,"roles",new CustomCollectionEditor(Set.class));
     }
 }

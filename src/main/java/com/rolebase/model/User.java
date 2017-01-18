@@ -39,7 +39,8 @@ public class User implements Serializable {
     private String email;
 
     @NotEmpty
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.ALL},fetch = FetchType.LAZY)
+//    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "APP_USER_USER_PROFILE",
             joinColumns = { @JoinColumn(name = "USER_ID") },
             inverseJoinColumns = { @JoinColumn(name = "USER_PROFILE_ID") })
@@ -140,6 +141,6 @@ public class User implements Serializable {
     public String toString() {
         return "User [id=" + id + ", ssoId=" + ssoId + ", password=" + password
                 + ", firstName=" + firstName + ", lastName=" + lastName
-                + ", email=" + email + "]";
+                + ", email=" + email +", userProfiles="+userProfiles +"]";
     }
 }
