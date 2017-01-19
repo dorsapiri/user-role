@@ -38,9 +38,7 @@ public class User implements Serializable {
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
-    @NotEmpty
-    @ManyToMany(cascade = {CascadeType.ALL},fetch = FetchType.LAZY)
-//    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "APP_USER_USER_PROFILE",
             joinColumns = { @JoinColumn(name = "USER_ID") },
             inverseJoinColumns = { @JoinColumn(name = "USER_PROFILE_ID") })
@@ -142,5 +140,21 @@ public class User implements Serializable {
         return "User [id=" + id + ", ssoId=" + ssoId + ", password=" + password
                 + ", firstName=" + firstName + ", lastName=" + lastName
                 + ", email=" + email +", userProfiles="+userProfiles +"]";
+    }
+
+    /**
+     * This property use for get Select element String and init userProfiles
+     * The keyword transient in Java used to indicate that the variable should not be serialized.
+     *
+     */
+    @Transient
+    public String userRole;
+
+    public String getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
     }
 }

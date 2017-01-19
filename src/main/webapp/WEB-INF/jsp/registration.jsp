@@ -98,7 +98,7 @@
             <div class="form-group col-md-12">
                 <label class="col-md-3 control-lable" for="userProf">Roles</label>
                 <div class="col-md-7">
-                    <form:select path="userProfiles" name="userProf" items="${roles}" multiple="true" itemValue="id" itemLabel="type" class="form-control input-sm" id="mysel"/>
+                    <form:select path="userRole" name="userProf" items="${roles}" multiple="true" itemValue="id" itemLabel="type" class="form-control input-sm" id="mysel"/>
                     <%--<form:select path="userProfiles" multiple="false">
                         <form:option value="none">---select---</form:option>
                         <form:option value="1" selected="true">Admin</form:option>

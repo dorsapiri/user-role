@@ -4,8 +4,11 @@ import com.rolebase.model.User;
 import com.rolebase.model.UserProfile;
 import com.rolebase.service.UserProfileService;
 import com.rolebase.service.UserService;
+import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
+import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
@@ -24,10 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by dorsa on 1/15/17.
@@ -76,6 +76,12 @@ public class AppController{
      */
     @RequestMapping(value = { "newuser" }, method = RequestMethod.POST)
     public String saveUser(@Valid User user, BindingResult result, ModelMap model) {
+
+        // Get select element string and set userProfiles
+        String[] mm = user.getUserRole().split(",");
+        Set<UserProfile> us=new HashSet<>();
+        us.add(userProfileService.findById(Integer.parseInt(mm[0])));
+        user.setUserProfiles(us);
 
         if (result.hasErrors()) {
             System.out.println("There are errors");
@@ -225,12 +231,5 @@ public class AppController{
     private boolean isCurrentAuthenticationAnonymous() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authenticationTrustResolver.isAnonymous(authentication);
-    }
-
-    @InitBinder
-    public void databinding(WebDataBinder binder){
-
-//        binder.registerCustomEditor(Set.class,"roles",new CustomCollectionEditor(Set.class));
-        binder.registerCustomEditor(UserProfile.class,"roles",new CustomCollectionEditor(Set.class));
     }
 }
